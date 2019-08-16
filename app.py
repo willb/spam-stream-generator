@@ -23,9 +23,14 @@ from markovify import Text
 def load_model(gzfn):
     """ loads a serialized JSON model """
     model = None
-    with gzip.open(gzfn, "rt", encoding="utf-8") as f:
-        model: Text = markovify.Text.from_json(f.read())
-    return model
+    try:
+        with gzip.open(gzfn, "rt", encoding="utf-8") as f:
+            model: Text = markovify.Text.from_json(f.read())
+
+        return model
+    except Exception as ex:
+        print(ex)
+        return None
 
 
 def make_sentence(model, length=200):
