@@ -64,7 +64,7 @@ def main(args):
 
     import time
 
-    logging.info('creating Markov chains at ' + time.asctime())
+    logging.info('creating Markov chains from %s, %s at %s' % (args.legitimate_model, args.spam_model, time.asctime()))
 
     legitimate_model = load_model(args.legitimate_model)
     spam_model = load_model(args.spam_model)
