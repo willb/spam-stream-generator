@@ -72,7 +72,9 @@ def main(args):
     logging.info('creating Markov chains from %s, %s at %s' % (args.legitimate_model, args.spam_model, time.asctime()))
 
     legitimate_model = load_model(args.legitimate_model)
+    logging.info('loaded legitimate model')
     spam_model = load_model(args.spam_model)
+    logging.info('loaded spam model')
 
     logging.info('creating update generator ' + time.asctime())
 
@@ -107,6 +109,8 @@ def parse_args(parser):
     args.spam_proportion = get_arg('SPAM_PROPORTION', args.spam_proportion)
     args.rate = get_arg('RATE', args.rate)
     args.source = get_arg('SOURCE_URI', args.source)
+    args.legitimate_model = get_arg('LEGITIMATE_MODEL', args.legitimate_model)
+    args.spam_model = get_arg('SPAM_MODEL', args.spam_model)
     return args
 
 
