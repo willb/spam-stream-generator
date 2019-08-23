@@ -37,7 +37,10 @@ def make_sentence(model, length=200):
     return model.make_short_sentence(length)
 
 
+model_counts = None
+
 def update_generator(models, weights=None):
+
     if weights is None:
         weights = [1] * len(models)
 
@@ -49,16 +52,19 @@ def update_generator(models, weights=None):
         choices.append((float(sum(weights[0:i + 1])) / total_weight, models[i]))
 
     def choose_model():
+        idx = 0
         r = numpy.random.uniform()
         for (p, m) in choices:
             if r <= p:
-                return m
-        return choices[-1][1]
+                return (idx, m)
+            idx = idx + 1
+        return (idx, choices[-1][1])
 
     while True:
-        tweet = make_sentence(choose_model())
+        idx, model = choose_model()
+        tweet = make_sentence(model)
 
-        yield tweet
+        yield (idx, tweet)
 
 
 def main(args):
@@ -78,7 +84,7 @@ def main(args):
 
     logging.info('creating update generator ' + time.asctime())
 
-    ug = update_generator([legitimate_model, spam_model], [1 - args.spam_proportion, args.spam_proportion])
+    ug = update_generator([legitimate_model, spam_model], [100 - int(args.spam_proportion * 100), int(args.spam_proportion * 100)])
 
     if args.dry_run:
         producer = None
@@ -87,8 +93,18 @@ def main(args):
         producer = KafkaProducer(bootstrap_servers=args.brokers)
 
     logging.info('sending lines ' + time.asctime())
+    model_counts = [0, 0]
+    msg_count = 0
+
     while True:
-        update = {"text": next(ug)}
+        idx, tweet = next(ug)
+        model_counts[idx] += 1
+        update = {"text": tweet}
+        msg_count += 1
+
+        if msg_count % 100 == 0:
+            info =  (model_counts[0], model_counts[1], float(model_counts[1]) / sum(model_counts))
+            logging.info("generated %d legitimate messages and %d spam messages; spam fraction is %f" % info)
 
         if args.dry_run:
             print(json.dumps(update))
