@@ -73,6 +73,20 @@ def main(args):
     logging.info('rate={}'.format(args.rate))
     logging.info('source={}'.format(args.source))
 
+    ready = False
+    
+    while not ready:
+        try:
+            if args.dry_run:
+                logging.info('running in dry run mode; not creating a kafka producer ')
+                producer = None
+            else:
+                logging.info('trying to create a kafka producer at ' + time.asctime() + "...")
+                producer = KafkaProducer(bootstrap_servers=args.brokers)
+            ready = True
+        finally:
+            pass
+
     import time
 
     logging.info('creating Markov chains from %s, %s at %s' % (args.legitimate_model, args.spam_model, time.asctime()))
@@ -85,12 +99,6 @@ def main(args):
     logging.info('creating update generator ' + time.asctime())
 
     ug = update_generator([legitimate_model, spam_model], [100 - int(args.spam_proportion * 100), int(args.spam_proportion * 100)])
-
-    if args.dry_run:
-        producer = None
-    else:
-        logging.info('creating kafka producer ' + time.asctime())
-        producer = KafkaProducer(bootstrap_servers=args.brokers)
 
     logging.info('sending lines ' + time.asctime())
     model_counts = [0, 0]
