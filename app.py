@@ -68,6 +68,8 @@ def update_generator(models, weights=None):
 
 
 def main(args):
+    import time
+    
     logging.info('brokers={}'.format(args.brokers))
     logging.info('topic={}'.format(args.topic))
     logging.info('rate={}'.format(args.rate))
@@ -86,8 +88,6 @@ def main(args):
             ready = True
         finally:
             pass
-
-    import time
 
     logging.info('creating Markov chains from %s, %s at %s' % (args.legitimate_model, args.spam_model, time.asctime()))
 
